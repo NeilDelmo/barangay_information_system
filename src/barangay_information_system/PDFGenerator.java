@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter;
  */
 public class PDFGenerator {
 
-    public static void generateBarangayClearance(Resident resident, String purpose) {
+    public static void generateBarangayClearance(Resident resident, String purpose, String pdfPath) {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage(PDRectangle.LETTER);
             document.addPage(page);
@@ -166,8 +166,7 @@ public class PDFGenerator {
             }
 
             // Save the document
-            String fileName = "Barangay_Clearance_" + resident.getLastName() + "_"
-                    + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE) + ".pdf";
+            String fileName = pdfPath;
             document.save(fileName);
             JOptionPane.showMessageDialog(null, "Document generated: " + fileName);
 
@@ -177,7 +176,7 @@ public class PDFGenerator {
         }
     }
 
-    public static void generateCertificateOfIndigency(Resident resident, String purpose) {
+    public static void generateCertificateOfIndigency(Resident resident, String purpose, String pdfPath) {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage(PDRectangle.LETTER);
             document.addPage(page);
@@ -287,7 +286,7 @@ public class PDFGenerator {
                 content.endText();
             }
 
-            String fileName = "Indigency_Certificate_" + resident.getLastName() + ".pdf";
+            String fileName = pdfPath;
             document.save(fileName);
             JOptionPane.showMessageDialog(null, "Document generated: " + fileName);
         } catch (Exception e) {

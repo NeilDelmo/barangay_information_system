@@ -4,9 +4,12 @@
  */
 package barangay_information_system;
 
+import java.awt.Desktop;
+import java.io.File;
 import javax.swing.*;
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -233,41 +236,61 @@ public class Document_Form extends javax.swing.JFrame {
         }
     }
 
-    private void generatePDF() {
-      String selectedDoc = (String) docTypeComboBox.getSelectedItem();
+  private void generatePDF() {
+    String selectedDoc = (String) docTypeComboBox.getSelectedItem();
     String selectedResident = (String) Residentcombobox.getSelectedItem();
     String purpose = jTextArea1.getText();
 
-        if (Residentcombobox.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(this, "Please select a resident first!");
-            return;
-        }
+    if (selectedResident == null || purpose.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Please select a resident and enter a purpose.");
+        return;
+    }
 
-        if (jTextArea1.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Purpose cannot be empty!");
-            return;
-        }
-        if (selectedResident == null || purpose.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please select a resident and enter a purpose.");
-            return;
-        }
+    int residentId = residentMap.get(selectedResident);
+    Resident resident = getResidentDetails(residentId);
 
-        int residentId = residentMap.get(selectedResident);
-        Resident resident = getResidentDetails(residentId);
+    if (resident != null) {
+        // Generate unique filename
+        String timestamp = java.time.LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String pdfPath = "D:/GeneratedDocuments/"
+                        + selectedDoc.replace(" ", "_") + "_"
+                        + resident.getLastName() + "_"
+                        + timestamp + ".pdf";
 
-        if (resident != null) {
         switch(selectedDoc) {
             case "Certificate of Indigency":
-                PDFGenerator.generateCertificateOfIndigency(resident, purpose);
+                PDFGenerator.generateCertificateOfIndigency(resident, purpose, pdfPath);
                 break;
             case "Barangay Clearance":
-                PDFGenerator.generateBarangayClearance(resident, purpose);
+                PDFGenerator.generateBarangayClearance(resident, purpose, pdfPath);
                 break;
             default:
                 JOptionPane.showMessageDialog(this, "Unsupported document type");
+                return;
         }
+
+        showPDFPreview(pdfPath);
     }
+}
+   private void showPDFPreview(String pdfPath) {
+    try {
+        File pdfFile = new File(pdfPath);
+        if (!pdfFile.exists()) {
+            JOptionPane.showMessageDialog(this, "PDF file not found!");
+            return;
+        }
+
+        // Open the PDF in the default viewer
+        if (Desktop.isDesktopSupported()) {
+            Desktop.getDesktop().open(pdfFile);
+        } else {
+            JOptionPane.showMessageDialog(this, "PDF preview not supported on this system.");
+        }
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error opening PDF: " + e.getMessage());
     }
+}
 
   private Resident getResidentDetails(int residentId) {
     try (Connection conn = DatabaseConnection.getConnection()) {
