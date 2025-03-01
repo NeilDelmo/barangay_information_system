@@ -9,8 +9,6 @@ import java.io.File;
 import javax.swing.*;
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +32,10 @@ public class Document_Form extends javax.swing.JFrame {
         loadResidents();
         loadDocumentTypes();
         initPreviewDialog();
+        businessInfoPanel.setVisible(false);
+        jPanel3.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(0, 0, 0)));
+        businessInfoPanel.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(0, 0, 0)));
+        
     }
 
     /**
@@ -57,6 +59,11 @@ public class Document_Form extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        businessInfoPanel = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+        businessNameField = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        businessAddressField = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -66,9 +73,21 @@ public class Document_Form extends javax.swing.JFrame {
         jLabel1.setText("Documents");
         jPanel2.add(jLabel1);
 
+        jPanel3.setBorder(new javax.swing.border.MatteBorder(null));
+
         Residentcombobox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        Residentcombobox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ResidentcomboboxActionPerformed(evt);
+            }
+        });
 
         docTypeComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        docTypeComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                docTypeComboBoxActionPerformed(evt);
+            }
+        });
 
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
@@ -80,7 +99,7 @@ public class Document_Form extends javax.swing.JFrame {
 
         jLabel4.setText("Types of Document:");
 
-        jButton1.setText("Save as pdf");
+        jButton1.setText("View and Download");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -103,7 +122,7 @@ public class Document_Form extends javax.swing.JFrame {
                     .addComponent(jButton1)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 337, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
-                .addContainerGap(147, Short.MAX_VALUE))
+                .addContainerGap(83, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -124,7 +143,48 @@ public class Document_Form extends javax.swing.JFrame {
                         .addComponent(docTypeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(38, 38, 38)
                 .addComponent(jButton1)
-                .addContainerGap(451, Short.MAX_VALUE))
+                .addContainerGap(118, Short.MAX_VALUE))
+        );
+
+        businessInfoPanel.setBorder(new javax.swing.border.MatteBorder(null));
+
+        jLabel5.setText("Business Name:");
+
+        jLabel6.setText("Business Address:");
+
+        businessAddressField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                businessAddressFieldActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout businessInfoPanelLayout = new javax.swing.GroupLayout(businessInfoPanel);
+        businessInfoPanel.setLayout(businessInfoPanelLayout);
+        businessInfoPanelLayout.setHorizontalGroup(
+            businessInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(businessInfoPanelLayout.createSequentialGroup()
+                .addGap(48, 48, 48)
+                .addGroup(businessInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(76, 76, 76)
+                .addGroup(businessInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(businessAddressField, javax.swing.GroupLayout.PREFERRED_SIZE, 279, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(businessNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 279, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        businessInfoPanelLayout.setVerticalGroup(
+            businessInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(businessInfoPanelLayout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addGroup(businessInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(businessNameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(businessInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(businessAddressField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(188, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -134,16 +194,20 @@ public class Document_Form extends javax.swing.JFrame {
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(409, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(businessInfoPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(471, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(23, 23, 23))
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(businessInfoPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(90, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -160,6 +224,19 @@ public class Document_Form extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void loadBusinessDataForSelectedResident() {
+        if (Residentcombobox.getSelectedItem() != null) {
+            int residentId = residentMap.get(Residentcombobox.getSelectedItem());
+            try {
+                String[] businessInfo = BusinessDAO.loadBusinessInfo(residentId);
+                businessNameField.setText(businessInfo[0]);
+                businessAddressField.setText(businessInfo[1]);
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Error loading business data: " + ex.getMessage());
+            }
+        }
+    }
+
     private void initPreviewDialog() {
         previewDialog = new JDialog(this, "Preview", true);
         previewPane = new JEditorPane();
@@ -171,8 +248,33 @@ public class Document_Form extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         generatePDF();
-        
+
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void businessAddressFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_businessAddressFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_businessAddressFieldActionPerformed
+
+    private void docTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_docTypeComboBoxActionPerformed
+        // TODO add your handling code here:
+        String selected = (String) docTypeComboBox.getSelectedItem();
+        boolean isBusiness = "Business Permit".equals(selected);
+        businessInfoPanel.setVisible(isBusiness);
+
+        if (isBusiness) {
+            loadBusinessDataForSelectedResident();
+        } else {
+            businessNameField.setText("");
+            businessAddressField.setText("");
+        }
+    }//GEN-LAST:event_docTypeComboBoxActionPerformed
+
+    private void ResidentcomboboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ResidentcomboboxActionPerformed
+        // TODO add your handling code here:
+        if ("Business Permit".equals(docTypeComboBox.getSelectedItem())) {
+            loadBusinessDataForSelectedResident();
+        }
+    }//GEN-LAST:event_ResidentcomboboxActionPerformed
 
     private void loadResidents() {
         try (Connection conn = DatabaseConnection.getConnection()) {
@@ -236,87 +338,115 @@ public class Document_Form extends javax.swing.JFrame {
         }
     }
 
-  private void generatePDF() {
-    String selectedDoc = (String) docTypeComboBox.getSelectedItem();
-    String selectedResident = (String) Residentcombobox.getSelectedItem();
-    String purpose = jTextArea1.getText();
+    private void generatePDF() {
+        String selectedDoc = (String) docTypeComboBox.getSelectedItem();
+        String selectedResident = (String) Residentcombobox.getSelectedItem();
+        String purpose = jTextArea1.getText();
 
-    if (selectedResident == null || purpose.isEmpty()) {
-        JOptionPane.showMessageDialog(this, "Please select a resident and enter a purpose.");
-        return;
-    }
-
-    int residentId = residentMap.get(selectedResident);
-    Resident resident = getResidentDetails(residentId);
-
-    if (resident != null) {
-        // Generate unique filename
-        String timestamp = java.time.LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        String pdfPath = "D:/GeneratedDocuments/"
-                        + selectedDoc.replace(" ", "_") + "_"
-                        + resident.getLastName() + "_"
-                        + timestamp + ".pdf";
-
-        switch(selectedDoc) {
-            case "Certificate of Indigency":
-                PDFGenerator.generateCertificateOfIndigency(resident, purpose, pdfPath);
-                break;
-            case "Barangay Clearance":
-                PDFGenerator.generateBarangayClearance(resident, purpose, pdfPath);
-                break;
-            default:
-                JOptionPane.showMessageDialog(this, "Unsupported document type");
-                return;
-        }
-
-        showPDFPreview(pdfPath);
-    }
-}
-   private void showPDFPreview(String pdfPath) {
-    try {
-        File pdfFile = new File(pdfPath);
-        if (!pdfFile.exists()) {
-            JOptionPane.showMessageDialog(this, "PDF file not found!");
+        // Validation
+        if (selectedResident == null || purpose.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please select resident and enter purpose");
             return;
         }
 
-        // Open the PDF in the default viewer
-        if (Desktop.isDesktopSupported()) {
-            Desktop.getDesktop().open(pdfFile);
-        } else {
-            JOptionPane.showMessageDialog(this, "PDF preview not supported on this system.");
+        // Business Permit specific validation
+        int residentId = residentMap.get(selectedResident);
+        Resident resident = getResidentDetails(residentId);
+        if ("Business Permit".equals(selectedDoc)) {
+            try {
+                BusinessDAO.saveBusinessInfo(
+                        residentId,
+                        businessNameField.getText(),
+                        businessAddressField.getText()
+                );
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Error saving business info: " + ex.getMessage());
+                return;
+            }
         }
 
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Error opening PDF: " + e.getMessage());
-    }
-}
+        if (resident != null) {
+            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            String pdfPath = "D:/GeneratedDocuments/"
+                    + selectedDoc.replace(" ", "_") + "_"
+                    + resident.getLastName() + "_"
+                    + timestamp + ".pdf";
 
-  private Resident getResidentDetails(int residentId) {
-    try (Connection conn = DatabaseConnection.getConnection()) {
-        PreparedStatement pst = conn.prepareStatement(
-                "SELECT FirstName, LastName, Address, CivilStatus, BirthDate "
-                + "FROM Residents WHERE ResidentID = ?");
-        pst.setInt(1, residentId);
-        ResultSet rs = pst.executeQuery();
+            try {
+                switch (selectedDoc) {
+                    case "Business Permit":
+                        PDFGenerator.generateBusinessPermit(
+                                resident,
+                                businessNameField.getText(),
+                                businessAddressField.getText(),
+                                pdfPath
+                        );
+                        break;
 
-        if (rs.next()) {
-            // Convert SQL Date to String (or LocalDate)
-            LocalDate birthDate = rs.getDate("BirthDate").toLocalDate();
+                    case "Barangay Clearance":
+                        PDFGenerator.generateBarangayClearance(resident, purpose, pdfPath);
+                        break;
 
-            return new Resident(
-                    rs.getString("FirstName"),
-                    rs.getString("LastName"),
-                    rs.getString("Address"),
-                    rs.getString("CivilStatus"),
-                    birthDate.toString() // Convert LocalDate to String (YYYY-MM-DD)
-            );
+                    case "Certificate of Indigency":
+                        PDFGenerator.generateCertificateOfIndigency(resident, purpose, pdfPath);
+                        break;
+
+                    default:
+                        JOptionPane.showMessageDialog(this, "Unsupported document type");
+                        return;
+                }
+                showPDFPreview(pdfPath);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Generation failed: " + e.getMessage());
+            }
         }
-    } catch (SQLException e) {
-        JOptionPane.showMessageDialog(null, "Error fetching resident: " + e.getMessage());
     }
-    return null;
-}
+
+    private void showPDFPreview(String pdfPath) {
+        try {
+            File pdfFile = new File(pdfPath);
+            if (!pdfFile.exists()) {
+                JOptionPane.showMessageDialog(this, "PDF file not found!");
+                return;
+            }
+
+            // Open the PDF in the default viewer
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(pdfFile);
+            } else {
+                JOptionPane.showMessageDialog(this, "PDF preview not supported on this system.");
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error opening PDF: " + e.getMessage());
+        }
+    }
+
+    private Resident getResidentDetails(int residentId) {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            PreparedStatement pst = conn.prepareStatement(
+                    "SELECT FirstName, LastName, Address, CivilStatus, BirthDate "
+                    + "FROM Residents WHERE ResidentID = ?");
+            pst.setInt(1, residentId);
+            ResultSet rs = pst.executeQuery();
+
+            if (rs.next()) {
+                // Convert SQL Date to String (or LocalDate)
+                LocalDate birthDate = rs.getDate("BirthDate").toLocalDate();
+
+                return new Resident(
+                        rs.getString("FirstName"),
+                        rs.getString("LastName"),
+                        rs.getString("Address"),
+                        rs.getString("CivilStatus"),
+                        birthDate.toString() // Convert LocalDate to String (YYYY-MM-DD)
+                );
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error fetching resident: " + e.getMessage());
+        }
+        return null;
+    }
 
     /**
      * @param args the command line arguments
@@ -355,12 +485,17 @@ public class Document_Form extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> Residentcombobox;
+    private javax.swing.JTextField businessAddressField;
+    private javax.swing.JPanel businessInfoPanel;
+    private javax.swing.JTextField businessNameField;
     private javax.swing.JComboBox<String> docTypeComboBox;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;

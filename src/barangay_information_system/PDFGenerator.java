@@ -17,6 +17,7 @@ import javax.swing.JOptionPane;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 
 /**
  *
@@ -294,6 +295,93 @@ public class PDFGenerator {
             e.printStackTrace();
         }
     }
+    public static void generateBusinessPermit(Resident resident, String businessName, String businessAddress, String pdfPath) {
+    try (PDDocument document = new PDDocument()) {
+        PDPage page = new PDPage(PDRectangle.LETTER);
+        document.addPage(page);
+
+        try (PDPageContentStream content = new PDPageContentStream(document, page)) {
+            // Reuse header setup from other documents
+            PDType1Font headerFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
+            PDType1Font bodyFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+            
+            float pageWidth = page.getMediaBox().getWidth();
+            float margin = 60;
+            float yPosition = 700;
+            float leading = 16f;
+
+            // Header Section
+            String[] headers = {
+                "REPUBLIC OF THE PHILIPPINES",
+                "MUNICIPALITY OF CALATAGAN, BATANGAS",
+                "BARANGAY BALIBAGO",
+                "OFFICE OF THE PUNONG BARANGAY"
+            };
+            
+            for (String header : headers) {
+                content.beginText();
+                content.setFont(headerFont, 14);
+                float textWidth = headerFont.getStringWidth(header) / 1000 * 14;
+                content.newLineAtOffset((pageWidth - textWidth) / 2, yPosition);
+                content.showText(header);
+                content.endText();
+                yPosition -= leading * 1.5f;
+            }
+
+            // Title
+            content.beginText();
+            content.setFont(headerFont, 16);
+            String title = "BUSINESS PERMIT";
+            float titleWidth = headerFont.getStringWidth(title) / 1000 * 16;
+            content.newLineAtOffset((pageWidth - titleWidth) / 2, yPosition - 40);
+            content.showText(title);
+            content.endText();
+            yPosition -= 100;
+
+            // Business Details
+            LocalDate issueDate = LocalDate.now();
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy");
+            
+            String contentText = "This certifies that\n\n" +
+                businessName.toUpperCase() + "\n\n" +
+                businessAddress.toUpperCase() + "\n\n" +
+                "is a business name registered in this office pursuant to the provisions of Act 3883.\n\n" +
+                "This certificate issued to\n\n" +
+                resident.getFullName().toUpperCase() + "\n\n" +
+                "is valid from " + issueDate.format(dateFormatter) + " to " +
+                issueDate.plusYears(5).format(dateFormatter) + ".\n\n" +
+                "Certificate No. " + String.format("%08d", new Random().nextInt(100000000)) + "\n\n" +
+                "Issued on " + issueDate.format(dateFormatter) + " in the Philippines.";
+
+            // Text wrapping
+            content.beginText();
+            content.setFont(bodyFont, 12);
+            content.newLineAtOffset(margin, yPosition);
+            content.setLeading(leading);
+            
+            for (String line : contentText.split("\n")) {
+                content.showText(line);
+                content.newLine();
+            }
+            content.endText();
+
+            // Signatures
+            content.beginText();
+            content.setFont(headerFont, 12);
+            content.newLineAtOffset(pageWidth - margin - 150, 120);
+            content.showText("HON. JUAN M. DELA CRUZ");
+            content.newLineAtOffset(0, -leading);
+            content.showText("Punong Barangay");
+            content.endText();
+
+        }
+
+        document.save(pdfPath);
+        JOptionPane.showMessageDialog(null, "Business permit generated: " + pdfPath);
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(null, "Error generating business permit: " + e.getMessage());
+    }
+}
 
     private static List<String> wrapText(String text, PDType1Font font, int fontSize, float maxWidth) throws IOException {
         List<String> lines = new ArrayList<>();
