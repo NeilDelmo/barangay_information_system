@@ -182,30 +182,23 @@ private Preferences prefs = Preferences.userNodeForPackage(Login.class);
     }
 
     try (Connection conn = DatabaseConnection.getConnection()) {
-        String query = "SELECT role FROM users WHERE username = ? AND password = ?";
+        String query = "SELECT UserID, role FROM users WHERE username = ? AND password = ?";
         PreparedStatement pst = conn.prepareStatement(query);
         pst.setString(1, username);
         pst.setString(2, password);
 
         try (ResultSet rs = pst.executeQuery()) {
             if (rs.next()) {
-                saveCredentials(username, password);
+                 int userId = rs.getInt("UserID");
                 String role = rs.getString("role");
+                UserSession session = UserSession.getInstance();
+                session.setUserId(userId);
+                session.setUserRole(role);
+                saveCredentials(username, password);
                 this.dispose();
-
-                switch (role) {
-                    case "Admin":
-                        new Dashboard().setVisible(true);
-                        break;
-                    case "Document":
-                        new Document_Form().setVisible(true);
-                        break;
-                    case "Health":
-                        new Health().setVisible(true);
-                        break;
-                    default:
-                        JOptionPane.showMessageDialog(this, "Unauthorized Role!");
-                }
+                Dashboard dashboard = new Dashboard();
+                dashboard.setVisible(true);
+                
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid credentials", "Error", JOptionPane.ERROR_MESSAGE);
             }
