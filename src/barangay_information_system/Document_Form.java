@@ -27,6 +27,7 @@ public class Document_Form extends javax.swing.JFrame {
     private Map<String, Integer> docTypeMap = new HashMap<>();
     private JDialog previewDialog;
     private JEditorPane previewPane;
+     private JLabel adminStatusLabel;
 
     /**
      * Creates new form Document_Form
@@ -41,6 +42,13 @@ public class Document_Form extends javax.swing.JFrame {
         businessInfoPanel.setVisible(false);
         jPanel3.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(0, 0, 0)));
         businessInfoPanel.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(0, 0, 0)));
+         String userRole = UserSession.getInstance().getUserRole();
+        if (userRole != null && userRole.equalsIgnoreCase("admin")) {
+            jLabel1.setText("Documents (Admin)");
+            adminStatusLabel = new JLabel("Documents will be automatically approved");
+            adminStatusLabel.setForeground(new java.awt.Color(0, 128, 0)); // Green color
+            jPanel2.add(adminStatusLabel);
+        }
 
     }
 
@@ -555,8 +563,21 @@ public class Document_Form extends javax.swing.JFrame {
         }
 
         try (Connection conn = DatabaseConnection.getConnection()) {
-            PreparedStatement pst = conn.prepareStatement(
+            PreparedStatement pst;
+            
+            // Check if current user is admin
+            String userRole = UserSession.getInstance().getUserRole();
+            boolean isAdmin = (userRole != null && userRole.equalsIgnoreCase("admin"));
+            
+            if (isAdmin) {
+                // For admin users, directly set status as "Approved"
+                pst = conn.prepareStatement(
+                    "INSERT INTO DocumentRequests (ResidentID, DocumentTypeID, Purpose, Status) VALUES (?, ?, ?, 'Completed')");
+            } else {
+                // For regular users, use the default status "Pending"
+                pst = conn.prepareStatement(
                     "INSERT INTO DocumentRequests (ResidentID, DocumentTypeID, Purpose) VALUES (?, ?, ?)");
+            }
 
             pst.setInt(1, residentMap.get(selectedResident));
             pst.setInt(2, docTypeMap.get(selectedDoc));
@@ -564,7 +585,13 @@ public class Document_Form extends javax.swing.JFrame {
 
             pst.executeUpdate();
             loadRequestHistory();
-            JOptionPane.showMessageDialog(this, "Document request submitted!");
+            
+            if (isAdmin) {
+                JOptionPane.showMessageDialog(this, "Document request submitted and auto-approved!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Document request submitted!");
+            }
+            
             jTextArea1.setText(""); // Clear purpose field
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage());
