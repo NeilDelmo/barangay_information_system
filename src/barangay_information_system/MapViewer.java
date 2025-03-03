@@ -188,7 +188,7 @@ mapPanel.addMouseMotionListener(new MouseAdapter() {
         btnZoomOut = new javax.swing.JButton();
         btnReset = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jPanel2.setBorder(new javax.swing.border.MatteBorder(null));
 
