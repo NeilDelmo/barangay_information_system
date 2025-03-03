@@ -5,6 +5,7 @@
 package barangay_information_system;
 
 import java.awt.Image;
+import java.awt.event.ItemEvent;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -22,6 +23,7 @@ import javax.swing.table.DefaultTableModel;
  * @author Neil
  */
 public class Residents extends javax.swing.JFrame {
+
     private String photoPath = "";
     private boolean isUpdateMode = false; // Track if we're updating
     private int selectedResidentId = -1;
@@ -35,6 +37,7 @@ public class Residents extends javax.swing.JFrame {
         familylhead();
         populateResidentsTable();
         jTextField7.setText("Balibago Calatagan Batangas");
+        addFamilyHeadListeners();
     }
 
     /**
@@ -115,7 +118,7 @@ public class Residents extends javax.swing.JFrame {
 
         jLabel5.setText("Sex:");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Male", "Female", "Others" }));
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Male", "Female", "Other" }));
 
         jLabel6.setText("Email Address:");
 
@@ -164,7 +167,7 @@ public class Residents extends javax.swing.JFrame {
                 {null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "ID", "First Name", "Last Name", "Status"
             }
         ));
         jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -181,7 +184,7 @@ public class Residents extends javax.swing.JFrame {
             }
         });
 
-        jButton3.setText("Logout");
+        jButton3.setText("Exit");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton3ActionPerformed(evt);
@@ -341,7 +344,27 @@ public class Residents extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+private void addFamilyHeadListeners() {
+        // Listener for Family Head checkbox
+        jCheckBox2.addActionListener(e -> {
+            boolean isFamilyHead = jCheckBox2.isSelected();
+            jComboBox4.setEnabled(!isFamilyHead);
+            if (isFamilyHead) {
+                jComboBox4.setSelectedIndex(0); // Reset combo to default
+            }
+        });
 
+        // Listener for Family Head combo box
+        jComboBox4.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                boolean hasFamilyHead = (jComboBox4.getSelectedIndex() > 0);
+                jCheckBox2.setEnabled(!hasFamilyHead);
+                if (hasFamilyHead) {
+                    jCheckBox2.setSelected(false);
+                }
+            }
+        });
+    }
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         uploadPhoto();
@@ -354,7 +377,7 @@ public class Residents extends javax.swing.JFrame {
 
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
         // TODO add your handling code here:
-         int selectedRow = jTable1.getSelectedRow();
+        int selectedRow = jTable1.getSelectedRow();
         if (selectedRow >= 0) {
             selectedResidentId = (int) jTable1.getValueAt(selectedRow, 0);
             loadResidentData(selectedResidentId);
@@ -388,14 +411,21 @@ public class Residents extends javax.swing.JFrame {
                 photoPath = rs.getString("PhotoPath");
 
                 // Load family head combo
+                boolean isFamilyHead = rs.getBoolean("IsFamilyHead");
                 int familyHeadId = rs.getInt("FamilyHeadID");
+
+                jCheckBox2.setSelected(isFamilyHead);
+                jComboBox4.setEnabled(!isFamilyHead);
                 if (familyHeadId > 0) {
+                    jCheckBox2.setEnabled(false);
                     for (int i = 0; i < jComboBox4.getItemCount(); i++) {
                         if (jComboBox4.getItemAt(i).startsWith(familyHeadId + " - ")) {
                             jComboBox4.setSelectedIndex(i);
                             break;
                         }
                     }
+                } else {
+                    jCheckBox2.setEnabled(true);
                 }
 
                 // Load photo
@@ -411,25 +441,27 @@ public class Residents extends javax.swing.JFrame {
     }
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
-         int selectedRow = jTable1.getSelectedRow();
-    if (selectedRow == -1) {
-        JOptionPane.showMessageDialog(this, "Please select a row to delete.");
-        return;
-    }
+        int selectedRow = jTable1.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a row to delete.");
+            return;
+        }
 
-    int confirm = JOptionPane.showConfirmDialog(this, "Are you sure?");
-    if (confirm != JOptionPane.YES_OPTION) return;
+        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure?");
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
 
-    int residentId = (int) jTable1.getValueAt(selectedRow, 0);
-    try (Connection conn = DatabaseConnection.getConnection()) {
-        String query = "DELETE FROM Residents WHERE ResidentID = ?";
-        PreparedStatement pst = conn.prepareStatement(query);
-        pst.setInt(1, residentId);
-        pst.executeUpdate();
-        populateResidentsTable(); // Refresh table
-    } catch (SQLException ex) {
-        ex.printStackTrace();
-    }
+        int residentId = (int) jTable1.getValueAt(selectedRow, 0);
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String query = "DELETE FROM Residents WHERE ResidentID = ?";
+            PreparedStatement pst = conn.prepareStatement(query);
+            pst.setInt(1, residentId);
+            pst.executeUpdate();
+            populateResidentsTable(); // Refresh table
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
@@ -459,18 +491,19 @@ public class Residents extends javax.swing.JFrame {
         }
 
     }
-      private void uploadPhoto() {
-    JFileChooser chooser = new JFileChooser();
-    chooser.setFileFilter(new FileNameExtensionFilter("Image files", "jpg", "png", "jpeg"));
-    if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-        File file = chooser.getSelectedFile();
-        // Use forward slashes for the path
-        photoPath = file.getAbsolutePath().replace("\\", "/"); // Replace backslashes with forward slashes
-        ImageIcon icon = new ImageIcon(photoPath);
-        Image img = icon.getImage().getScaledInstance(jLabel13.getWidth(), jLabel13.getHeight(), Image.SCALE_SMOOTH);
-        jLabel13.setIcon(new ImageIcon(img));
+
+    private void uploadPhoto() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileFilter(new FileNameExtensionFilter("Image files", "jpg", "png", "jpeg"));
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            // Use forward slashes for the path
+            photoPath = file.getAbsolutePath().replace("\\", "/"); // Replace backslashes with forward slashes
+            ImageIcon icon = new ImageIcon(photoPath);
+            Image img = icon.getImage().getScaledInstance(jLabel13.getWidth(), jLabel13.getHeight(), Image.SCALE_SMOOTH);
+            jLabel13.setIcon(new ImageIcon(img));
+        }
     }
-}
 
     private void clearFields() {
         jTextField1.setText("");
@@ -487,8 +520,10 @@ public class Residents extends javax.swing.JFrame {
         photoPath = ""; // Reset photo path
     }
 
-   private void submitResidentData() {
-        if (!validateFields()) return;
+    private void submitResidentData() {
+        if (!validateFields()) {
+            return;
+        }
 
         boolean isFamilyHead = jCheckBox2.isSelected();
         if (!isFamilyHead && jComboBox4.getSelectedIndex() == 0) {
@@ -499,18 +534,18 @@ public class Residents extends javax.swing.JFrame {
         try (Connection conn = DatabaseConnection.getConnection()) {
             String query;
             if (isUpdateMode) {
-                query = "UPDATE Residents SET " +
-                        "FirstName=?, MiddleName=?, LastName=?, BirthDate=?, " +
-                        "Gender=?, CivilStatus=?, ContactNumber=?, Email=?, " +
-                        "Address=?, Occupation=?, IsVoter=?, IsFamilyHead=?, " +
-                        "PhotoPath=?, Status=?, FamilyHeadID=? " +
-                        "WHERE ResidentID=?";
+                query = "UPDATE Residents SET "
+                        + "FirstName=?, MiddleName=?, LastName=?, BirthDate=?, "
+                        + "Gender=?, CivilStatus=?, ContactNumber=?, Email=?, "
+                        + "Address=?, Occupation=?, IsVoter=?, IsFamilyHead=?, "
+                        + "PhotoPath=?, Status=?, FamilyHeadID=? "
+                        + "WHERE ResidentID=?";
             } else {
-                query = "INSERT INTO Residents (" +
-                        "FirstName, MiddleName, LastName, BirthDate, Gender, " +
-                        "CivilStatus, ContactNumber, Email, Address, Occupation, " +
-                        "IsVoter, IsFamilyHead, PhotoPath, Status, FamilyHeadID" +
-                        ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                query = "INSERT INTO Residents ("
+                        + "FirstName, MiddleName, LastName, BirthDate, Gender, "
+                        + "CivilStatus, ContactNumber, Email, Address, Occupation, "
+                        + "IsVoter, IsFamilyHead, PhotoPath, Status, FamilyHeadID"
+                        + ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             }
 
             PreparedStatement pst = conn.prepareStatement(query);
@@ -550,7 +585,7 @@ public class Residents extends javax.swing.JFrame {
 
             String message = isUpdateMode ? "updated" : "submitted";
             JOptionPane.showMessageDialog(this, "Resident data " + message + " successfully!");
-            
+
             resetForm();
             populateResidentsTable();
             familylhead(); // Refresh family heads combo
@@ -568,41 +603,40 @@ public class Residents extends javax.swing.JFrame {
     }
 
     private boolean validateFields() {
-        if (jTextField1.getText().isEmpty() || jTextField3.getText().isEmpty() ||
-            jDateChooser1.getDate() == null || jComboBox1.getSelectedItem() == null ||
-            jComboBox2.getSelectedItem() == null || jTextField5.getText().isEmpty() ||
-            jTextField4.getText().isEmpty() || jTextField7.getText().isEmpty() ||
-            jTextField8.getText().isEmpty()) {
+        if (jTextField1.getText().isEmpty() || jTextField3.getText().isEmpty()
+                || jDateChooser1.getDate() == null || jComboBox1.getSelectedItem() == null
+                || jComboBox2.getSelectedItem() == null || jTextField5.getText().isEmpty()
+                || jTextField4.getText().isEmpty() || jTextField7.getText().isEmpty()
+                || jTextField8.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please fill in all required fields.");
             return false;
         }
         return true;
     }
-    
-    private void populateResidentsTable(){
-    DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-    model.setRowCount(0);
-    
-    try(Connection conn = DatabaseConnection.getConnection()){
-        
-        String query = "SELECT ResidentID, FirstName, LastName, ContactNumber, Status FROM residents";
-        PreparedStatement pst = conn.prepareStatement(query);
-        ResultSet rs = pst.executeQuery();
-        
-        while(rs.next()){
-            model.addRow(new Object[]{
-                rs.getInt("ResidentID"),
-                rs.getString("FirstName"),
-                rs.getString("LastName"),
-                rs.getString("ContactNumber"),
-                rs.getString("Status")
 
-            });
+    private void populateResidentsTable() {
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0);
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+
+            String query = "SELECT ResidentID, FirstName, LastName, Status FROM residents";
+            PreparedStatement pst = conn.prepareStatement(query);
+            ResultSet rs = pst.executeQuery();
+
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getInt("ResidentID"),
+                    rs.getString("FirstName"),
+                    rs.getString("LastName"),
+                    rs.getString("Status")
+
+                });
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    }catch(SQLException e){
-        e.printStackTrace();
-    }
-    
+
     }
 
     /**

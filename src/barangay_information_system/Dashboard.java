@@ -12,6 +12,8 @@ import java.awt.BorderLayout;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import javax.swing.table.DefaultTableModel;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,6 +22,8 @@ import java.sql.SQLException;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.RowFilter;
 import javax.swing.table.TableRowSorter;
 
@@ -28,7 +32,8 @@ import javax.swing.table.TableRowSorter;
  * @author Neil
  */
 public class Dashboard extends javax.swing.JFrame {
-     private TableRowSorter<DefaultTableModel> sorter;
+
+    private TableRowSorter<DefaultTableModel> sorter;
 
     /**
      * Creates new form Dashboard
@@ -36,10 +41,21 @@ public class Dashboard extends javax.swing.JFrame {
     public Dashboard() {
         initComponents();
         setLocationRelativeTo(null);
-        populateTable("");
+        filterButton.setVisible(false);
         createPopulationChart();
+        genderComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(
+                new String[]{"All", "Male", "Female", "Other"}
+        ));
+        genderComboBox.addItemListener(new ItemListener() {
+    @Override
+    public void itemStateChanged(ItemEvent e) {
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+            applyFilters();
+        }
+    }
+});
         setupSearchFilter();
-         jPanel3.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(0, 0, 0)));
+        jPanel3.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(0, 0, 0)));
         jPanel10.setLayout(new BorderLayout());
         JLabel houseCountLabel = new JLabel("0", SwingConstants.CENTER);
         houseCountLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
@@ -48,7 +64,9 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel10.add(houseTitleLabel, BorderLayout.SOUTH);
 
         // Add method to update house count
+        applyFilters();
         updateHouseCount();
+        configureRoleBasedUI();
 
     }
 
@@ -82,6 +100,9 @@ public class Dashboard extends javax.swing.JFrame {
         jTextField1 = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jButton5 = new javax.swing.JButton();
+        genderComboBox = new javax.swing.JComboBox<>();
+        jLabel2 = new javax.swing.JLabel();
+        filterButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -121,7 +142,7 @@ public class Dashboard extends javax.swing.JFrame {
             .addGroup(jPanel10Layout.createSequentialGroup()
                 .addGap(74, 74, 74)
                 .addComponent(jLabel8)
-                .addContainerGap(99, Short.MAX_VALUE))
+                .addContainerGap(149, Short.MAX_VALUE))
         );
         jPanel10Layout.setVerticalGroup(
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -215,42 +236,42 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap(45, Short.MAX_VALUE)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton3))
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGap(54, 54, 54)
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(46, 46, 46)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                        .addComponent(jButton3)
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 40, Short.MAX_VALUE)))
-                .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(127, 127, 127))
+                            .addComponent(jButton4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(30, 30, 30)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jButton6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(60, 60, 60))))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jButton3)
-                .addGap(6, 6, 6)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(39, 39, 39)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(27, Short.MAX_VALUE))
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(38, 38, 38)
+                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(92, 92, 92))))
         );
 
         jPanel5.setBorder(new javax.swing.border.MatteBorder(null));
@@ -281,7 +302,7 @@ public class Dashboard extends javax.swing.JFrame {
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 299, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -302,6 +323,17 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
+        genderComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        jLabel2.setText("Filter by Gender");
+
+        filterButton.setText("Filter");
+        filterButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                filterButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
@@ -312,7 +344,11 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(jButton5)
                     .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 285, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(filterButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 117, Short.MAX_VALUE)
+                            .addComponent(genderComboBox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addGap(21, 21, 21))
         );
         jPanel6Layout.setVerticalGroup(
@@ -324,7 +360,13 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton5)
-                .addContainerGap(197, Short.MAX_VALUE))
+                .addGap(25, 25, 25)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(genderComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(filterButton)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -336,7 +378,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(18, 18, 18)
                         .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -373,19 +415,127 @@ public class Dashboard extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-private void updateHouseCount() {
-    try (Connection conn = DatabaseConnection.getConnection()) {
-        String query = "SELECT COUNT(*) AS total FROM Houses";
-        PreparedStatement pst = conn.prepareStatement(query);
-        ResultSet rs = pst.executeQuery();
-        if(rs.next()) {
-            JLabel countLabel = (JLabel)((BorderLayout)jPanel10.getLayout()).getLayoutComponent(BorderLayout.CENTER);
-            countLabel.setText(String.valueOf(rs.getInt("total")));
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
+
+    private void applyFilters() {
+        String searchText = jTextField1.getText().trim();
+        String genderFilter = (String) genderComboBox.getSelectedItem();
+        populateTable(searchText, genderFilter);
     }
-}
+
+     private void populateTable(String searchTerm, String genderFilter) {
+        DefaultTableModel tableModel = new DefaultTableModel(
+            new String[]{"Full Name", "Gender", "Address"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String baseQuery = "SELECT CONCAT_WS(' ', FirstName, MiddleName, LastName) AS FullName, Gender, Address FROM Residents";
+            List<String> conditions = new ArrayList<>();
+            List<String> params = new ArrayList<>();
+
+            // Gender filter
+            if (genderFilter != null && !genderFilter.equals("All")) {
+                conditions.add("Gender = ?");
+                params.add(genderFilter);
+            }
+
+            // Search term filter
+            if (searchTerm != null && !searchTerm.isEmpty()) {
+                conditions.add("(CONCAT_WS(' ', FirstName, MiddleName, LastName) LIKE ? OR Address LIKE ?)");
+                params.add("%" + searchTerm + "%");
+                params.add("%" + searchTerm + "%");
+            }
+
+            // Build WHERE clause if conditions exist
+            if (!conditions.isEmpty()) {
+                baseQuery += " WHERE " + String.join(" AND ", conditions);
+            }
+
+            PreparedStatement pst = conn.prepareStatement(baseQuery);
+            for (int i = 0; i < params.size(); i++) {
+                pst.setString(i + 1, params.get(i));
+            }
+
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                tableModel.addRow(new Object[]{
+                    rs.getString("FullName"),
+                    rs.getString("Gender"),
+                    rs.getString("Address")
+                });
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        jTable1.setModel(tableModel);
+        
+        // After setting the new model, we need to update the sorter
+        sorter = new TableRowSorter<>((DefaultTableModel) jTable1.getModel());
+        jTable1.setRowSorter(sorter);
+        
+        // If there's a search term, apply it to the new sorter
+        if (searchTerm != null && !searchTerm.isEmpty()) {
+            sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchTerm));
+        }
+    }
+
+    private void configureRoleBasedUI() {
+        String role = UserSession.getInstance().getUserRole();
+        // Preserve original text structure
+        String baseText = "WELCOME TO BARANGAY BALIBAGO";
+        jLabel7.setText("<html><div style='text-align: center;'>" + baseText + "<br/><small>(" + role + ")</small></div></html>");
+
+        switch (role) {
+            case "Document":
+                // Hide Health and Map buttons
+                jButton2.setVisible(false);
+                jButton7.setVisible(false);
+                // Disable Houses button
+                jButton6.setEnabled(false);
+                break;
+
+            case "Health":
+                // Hide Documents and Map buttons
+                jButton4.setVisible(false);
+                jButton7.setVisible(false);
+                // Disable Houses button
+                jButton6.setEnabled(false);
+                break;
+
+            case "Admin":
+                // All buttons visible and enabled by default
+                break;
+
+            default:
+                // For basic users, hide admin features
+                jButton6.setVisible(false);
+                jButton7.setVisible(false);
+        }
+
+        // Revalidate the panel to update layout
+        jPanel4.revalidate();
+        jPanel4.repaint();
+    }
+
+    private void updateHouseCount() {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String query = "SELECT COUNT(*) AS total FROM Houses";
+            PreparedStatement pst = conn.prepareStatement(query);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                JLabel countLabel = (JLabel) ((BorderLayout) jPanel10.getLayout()).getLayoutComponent(BorderLayout.CENTER);
+                countLabel.setText(String.valueOf(rs.getInt("total")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
         Login login = new Login();
@@ -416,56 +566,30 @@ private void updateHouseCount() {
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         // TODO add your handling code here:
         searchResident();
+        applyFilters();
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void jTextField1KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField1KeyReleased
         // TODO add your handling code here:
-         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             searchResident();
+            applyFilters();
         } else {
             searchResident(); // Real-time search as typing
+            applyFilters();
         }
     }//GEN-LAST:event_jTextField1KeyReleased
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
         // TODO add your handling code here:
+        MapViewer map = new MapViewer();
+        map.setVisible(true);
     }//GEN-LAST:event_jButton7ActionPerformed
 
-     private void populateTable(String searchTerm) {
-        String[] columnNames = {"Full Name", "Address"};
-        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; // Make table non-editable
-            }
-        };
-
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            String query = "SELECT CONCAT_WS(' ', FirstName, MiddleName, LastName) AS FullName, Address " +
-                           "FROM Residents " +
-                           "WHERE Status = 'active' AND " +
-                           "(CONCAT_WS(' ', FirstName, MiddleName, LastName) LIKE ? OR Address LIKE ?)";
-            
-            PreparedStatement pst = conn.prepareStatement(query);
-            String likeTerm = "%" + searchTerm + "%";
-            pst.setString(1, likeTerm);
-            pst.setString(2, likeTerm);
-            
-            ResultSet rs = pst.executeQuery();
-            
-            while(rs.next()) {
-                String fullname = rs.getString("FullName");
-                String address = rs.getString("Address");
-                tableModel.addRow(new Object[]{fullname, address});
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        jTable1.setModel(tableModel);
-        setupSearchFilter();
-    }
+    private void filterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_filterButtonActionPerformed
+        // TODO add your handling code here:
+        applyFilters();
+    }//GEN-LAST:event_filterButtonActionPerformed
 
     private void setupSearchFilter() {
         sorter = new TableRowSorter<>((DefaultTableModel) jTable1.getModel());
@@ -485,7 +609,7 @@ private void updateHouseCount() {
         DefaultPieDataset dataset = new DefaultPieDataset();
 
         try (Connection conn = DatabaseConnection.getConnection()) {
-            String query = "SELECT Gender, COUNT(*) AS Count FROM Residents WHERE Status = 'active' GROUP BY Gender";
+            String query = "SELECT Gender, COUNT(*) AS Count FROM Residents GROUP BY Gender";
             PreparedStatement pst = conn.prepareStatement(query);
             ResultSet rs = pst.executeQuery();
 
@@ -558,6 +682,8 @@ private void updateHouseCount() {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton filterButton;
+    private javax.swing.JComboBox<String> genderComboBox;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
@@ -566,6 +692,7 @@ private void updateHouseCount() {
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
