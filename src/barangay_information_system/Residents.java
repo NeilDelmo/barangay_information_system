@@ -600,6 +600,9 @@ private void addFamilyHeadListeners() {
         isUpdateMode = false;
         selectedResidentId = -1;
         jButton2.setText("Submit");
+        jCheckBox2.setEnabled(true);
+        jComboBox4.setEnabled(true);
+        jComboBox4.setSelectedIndex(0);
     }
 
     private boolean validateFields() {
