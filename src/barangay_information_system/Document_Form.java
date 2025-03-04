@@ -16,6 +16,7 @@ import java.util.Map;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableRowSorter;
 
 /**
  *
@@ -27,7 +28,8 @@ public class Document_Form extends javax.swing.JFrame {
     private Map<String, Integer> docTypeMap = new HashMap<>();
     private JDialog previewDialog;
     private JEditorPane previewPane;
-     private JLabel adminStatusLabel;
+    private JLabel adminStatusLabel;
+    private TableRowSorter<DefaultTableModel> sorter;
 
     /**
      * Creates new form Document_Form
@@ -42,13 +44,16 @@ public class Document_Form extends javax.swing.JFrame {
         businessInfoPanel.setVisible(false);
         jPanel3.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(0, 0, 0)));
         businessInfoPanel.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(0, 0, 0)));
-         String userRole = UserSession.getInstance().getUserRole();
+        String userRole = UserSession.getInstance().getUserRole();
         if (userRole != null && userRole.equalsIgnoreCase("admin")) {
             jLabel1.setText("Documents (Admin)");
             adminStatusLabel = new JLabel("Documents will be automatically approved");
             adminStatusLabel.setForeground(new java.awt.Color(0, 128, 0)); // Green color
             jPanel2.add(adminStatusLabel);
         }
+        DefaultTableModel model = (DefaultTableModel) requestHistoryTable.getModel();
+        sorter = new TableRowSorter<>(model);
+        requestHistoryTable.setRowSorter(sorter);
 
     }
 
@@ -99,6 +104,7 @@ public class Document_Form extends javax.swing.JFrame {
         jScrollPane10 = new javax.swing.JScrollPane();
         requestHistoryTable = new javax.swing.JTable();
         jButton2 = new javax.swing.JButton();
+        jComboBox1 = new javax.swing.JComboBox<>();
 
         jTable8.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -368,6 +374,13 @@ public class Document_Form extends javax.swing.JFrame {
             }
         });
 
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Pending", "Completed" }));
+        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBox1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -378,11 +391,14 @@ public class Document_Form extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(businessInfoPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(51, 51, 51)
+                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton2)))
                 .addContainerGap())
         );
@@ -398,8 +414,10 @@ public class Document_Form extends javax.swing.JFrame {
                         .addComponent(businessInfoPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap())
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jButton2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton2)
+                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, 656, javax.swing.GroupLayout.PREFERRED_SIZE))))
         );
 
@@ -440,7 +458,7 @@ public class Document_Form extends javax.swing.JFrame {
     }
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        
+
         generatePDF();
         submitRequest();
 
@@ -477,6 +495,27 @@ public class Document_Form extends javax.swing.JFrame {
         Dashboard dashboard = new Dashboard();
         dashboard.setVisible(true);
     }//GEN-LAST:event_jButton2ActionPerformed
+   private void filterByStatus() {
+    String selectedStatus = (String) jComboBox1.getSelectedItem();
+    DefaultTableModel model = (DefaultTableModel) requestHistoryTable.getModel();
+    
+    if (selectedStatus.equals("All")) {
+        sorter.setRowFilter(null); // Show all rows
+    } else {
+        // Create a case-insensitive filter for the status column (index 3)
+        try {
+            RowFilter<DefaultTableModel, Object> filter = RowFilter.regexFilter("(?i)^" + selectedStatus + "$", 3);
+            sorter.setRowFilter(filter);
+        } catch (Exception e) {
+            // If filtering fails, show all rows
+            sorter.setRowFilter(null);
+        }
+    }
+}
+    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+        // TODO add your handling code here:
+        filterByStatus();
+    }//GEN-LAST:event_jComboBox1ActionPerformed
 
     private void loadResidents() {
         try (Connection conn = DatabaseConnection.getConnection()) {
@@ -514,43 +553,39 @@ public class Document_Form extends javax.swing.JFrame {
         }
     }
 
-   private void loadRequestHistory() {
-    DefaultTableModel model = new DefaultTableModel(
-        new Object[]{"Request Date", "Resident", "Document Type", "Status"}, 0
-    );
+    private void loadRequestHistory() {
+        DefaultTableModel model = new DefaultTableModel(
+                new Object[]{"Request Date", "Resident", "Document Type", "Status"}, 0
+        );
 
-    // Fixed query with proper aliases
-    String query = "SELECT dr.RequestDate AS RequestDate, " +
-                   "COALESCE(CONCAT(r.FirstName, ' ', r.LastName), 'Deleted Resident') AS ResidentName, " +
-                   "COALESCE(dt.DocumentName, 'Deleted Document') AS DocumentName, " +
-                   "dr.Status AS Status " +
-                   "FROM DocumentRequests dr " +
-                   "LEFT JOIN Residents r ON dr.ResidentID = r.ResidentID " +
-                   "LEFT JOIN DocumentTypes dt ON dr.DocumentTypeID = dt.DocumentTypeID " +
-                   "ORDER BY dr.RequestDate DESC";
+        // Fixed query with proper aliases
+        String query = "SELECT dr.RequestDate AS RequestDate, "
+                + "COALESCE(CONCAT(r.FirstName, ' ', r.LastName), 'Deleted Resident') AS ResidentName, "
+                + "COALESCE(dt.DocumentName, 'Deleted Document') AS DocumentName, "
+                + "dr.Status AS Status "
+                + "FROM DocumentRequests dr "
+                + "LEFT JOIN Residents r ON dr.ResidentID = r.ResidentID "
+                + "LEFT JOIN DocumentTypes dt ON dr.DocumentTypeID = dt.DocumentTypeID "
+                + "ORDER BY dr.RequestDate DESC";
 
-    try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement pst = conn.prepareStatement(query);
-         ResultSet rs = pst.executeQuery()) {
+        try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement pst = conn.prepareStatement(query); ResultSet rs = pst.executeQuery()) {
 
-        while(rs.next()) {
-            model.addRow(new Object[]{
-                rs.getTimestamp("RequestDate"),
-                rs.getString("ResidentName"),  // Use alias
-                rs.getString("DocumentName"),  // Use alias
-                rs.getString("Status")
-            });
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getTimestamp("RequestDate"),
+                    rs.getString("ResidentName"), // Use alias
+                    rs.getString("DocumentName"), // Use alias
+                    rs.getString("Status")
+                });
+            }
+
+            requestHistoryTable.setModel(model);
+
+            // Rest of your formatting code...
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error loading history: " + e.getMessage());
         }
-
-        requestHistoryTable.setModel(model);
-
-        // Rest of your formatting code...
-    } catch (SQLException e) {
-        JOptionPane.showMessageDialog(this, "Error loading history: " + e.getMessage());
     }
-}
-
-    
 
     private void submitRequest() {
         String selectedResident = (String) Residentcombobox.getSelectedItem();
@@ -564,19 +599,19 @@ public class Document_Form extends javax.swing.JFrame {
 
         try (Connection conn = DatabaseConnection.getConnection()) {
             PreparedStatement pst;
-            
+
             // Check if current user is admin
             String userRole = UserSession.getInstance().getUserRole();
             boolean isAdmin = (userRole != null && userRole.equalsIgnoreCase("admin"));
-            
+
             if (isAdmin) {
                 // For admin users, directly set status as "Approved"
                 pst = conn.prepareStatement(
-                    "INSERT INTO DocumentRequests (ResidentID, DocumentTypeID, Purpose, Status) VALUES (?, ?, ?, 'Completed')");
+                        "INSERT INTO DocumentRequests (ResidentID, DocumentTypeID, Purpose, Status) VALUES (?, ?, ?, 'Completed')");
             } else {
                 // For regular users, use the default status "Pending"
                 pst = conn.prepareStatement(
-                    "INSERT INTO DocumentRequests (ResidentID, DocumentTypeID, Purpose) VALUES (?, ?, ?)");
+                        "INSERT INTO DocumentRequests (ResidentID, DocumentTypeID, Purpose) VALUES (?, ?, ?)");
             }
 
             pst.setInt(1, residentMap.get(selectedResident));
@@ -585,13 +620,13 @@ public class Document_Form extends javax.swing.JFrame {
 
             pst.executeUpdate();
             loadRequestHistory();
-            
+
             if (isAdmin) {
                 JOptionPane.showMessageDialog(this, "Document request submitted and auto-approved!");
             } else {
                 JOptionPane.showMessageDialog(this, "Document request submitted!");
             }
-            
+
             jTextArea1.setText(""); // Clear purpose field
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage());
@@ -650,6 +685,25 @@ public class Document_Form extends javax.swing.JFrame {
                     case "Certificate of Indigency":
                         PDFGenerator.generateCertificateOfIndigency(resident, purpose, pdfPath);
                         break;
+
+                    case "Residency Certificate":
+                        PDFGenerator.generateResidencyCertificate(resident, purpose, pdfPath);
+                        break;
+                        
+                    case "Community Tax Certificate":
+                    PDFGenerator.generateCommunityTaxCertificate(resident, purpose, pdfPath);
+                    break;
+                    
+                    case "Good Moral Character Certificate":
+                    PDFGenerator.generateGoodMoralCertificate(resident, purpose, pdfPath);
+                    break;
+                    
+                     case "Event Permit":
+                    String eventName = JOptionPane.showInputDialog(this, "Enter Event Name:");
+                    String eventDate = JOptionPane.showInputDialog(this, "Enter Event Date (MM/DD/YYYY):");
+                    String eventVenue = JOptionPane.showInputDialog(this, "Enter Event Venue:");
+                    PDFGenerator.generateEventPermit(resident, eventName, eventDate, eventVenue, pdfPath);
+                    break;
 
                     default:
                         JOptionPane.showMessageDialog(this, "Unsupported document type");
@@ -751,6 +805,7 @@ public class Document_Form extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> docTypeComboBox;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

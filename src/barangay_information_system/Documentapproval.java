@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package barangay_information_system;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -20,7 +21,7 @@ public class Documentapproval extends javax.swing.JFrame {
     /**
      * Creates new form Documentapproval
      */
-     private DefaultTableModel model;
+    private DefaultTableModel model;
     private TableRowSorter<DefaultTableModel> sorter;
     private int currentUserId = 1; // Replace with actual logged-in user ID
 
@@ -34,15 +35,15 @@ public class Documentapproval extends javax.swing.JFrame {
 
     private void setupTable() {
         model = new DefaultTableModel(
-            new Object[][]{},
-            new String[]{"RequestID", "ResidentID", "DocumentType", "RequestDate", "Purpose", "Status"}
+                new Object[][]{},
+                new String[]{"RequestID", "ResidentID", "DocumentType", "RequestDate", "Purpose", "Status"}
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
-        
+
         jTable1.setModel(model);
         sorter = new TableRowSorter<>(model);
         jTable1.setRowSorter(sorter);
@@ -51,12 +52,13 @@ public class Documentapproval extends javax.swing.JFrame {
     private void populateDocumentRequests() {
         model.setRowCount(0);
         try (Connection conn = DatabaseConnection.getConnection()) {
-            String query = "SELECT r.RequestID, r.ResidentID, d.DocumentName, r.RequestDate, r.Purpose, r.Status "
-                         + "FROM DocumentRequests r "
-                         + "JOIN DocumentTypes d ON r.DocumentTypeID = d.DocumentTypeID";
+           String query = "SELECT r.RequestID, r.ResidentID, d.DocumentName, r.RequestDate, r.Purpose, r.Status "
+                     + "FROM DocumentRequests r "
+                     + "JOIN DocumentTypes d ON r.DocumentTypeID = d.DocumentTypeID "
+                     + "ORDER BY r.RequestDate DESC";
             PreparedStatement pst = conn.prepareStatement(query);
             ResultSet rs = pst.executeQuery();
-            
+
             while (rs.next()) {
                 model.addRow(new Object[]{
                     rs.getInt("RequestID"),
@@ -75,12 +77,20 @@ public class Documentapproval extends javax.swing.JFrame {
     private void setupSearchFilter() {
         jTextField1.getDocument().addDocumentListener(new DocumentListener() {
             @Override
-            public void insertUpdate(DocumentEvent e) { filter(); }
+            public void insertUpdate(DocumentEvent e) {
+                filter();
+            }
+
             @Override
-            public void removeUpdate(DocumentEvent e) { filter(); }
+            public void removeUpdate(DocumentEvent e) {
+                filter();
+            }
+
             @Override
-            public void changedUpdate(DocumentEvent e) { filter(); }
-            
+            public void changedUpdate(DocumentEvent e) {
+                filter();
+            }
+
             private void filter() {
                 String text = jTextField1.getText().trim();
                 if (text.length() == 0) {
@@ -110,6 +120,7 @@ public class Documentapproval extends javax.swing.JFrame {
         jPanel3 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        jComboBox1 = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -143,7 +154,7 @@ public class Documentapproval extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(19, 19, 19)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 573, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(23, Short.MAX_VALUE))
+                .addContainerGap(22, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -168,6 +179,13 @@ public class Documentapproval extends javax.swing.JFrame {
 
         jLabel2.setText("Search");
 
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Pending", "Completed" }));
+        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBox1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -175,9 +193,11 @@ public class Documentapproval extends javax.swing.JFrame {
             .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(26, 26, 26)
-                .addComponent(approveButton)
-                .addGap(19, 19, 19))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(approveButton)
+                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(27, 27, 27))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(66, 66, 66)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -197,6 +217,8 @@ public class Documentapproval extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(89, 89, 89)
                         .addComponent(approveButton)
                         .addContainerGap())))
         );
@@ -222,32 +244,47 @@ public class Documentapproval extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Please select a request to approve");
             return;
         }
-        
+
         UserSession user = UserSession.getInstance();
         int currentUserId = user.getUserId();
-        
+
         int requestId = (int) model.getValueAt(jTable1.convertRowIndexToModel(selectedRow), 0);
-        
+
         try (Connection conn = DatabaseConnection.getConnection()) {
             String query = "UPDATE DocumentRequests "
-                         + "SET Status = 'completed', ProcessedByUserID = ?, DateProcessed = NOW() "
-                         + "WHERE RequestID = ?";
-            
+                    + "SET Status = 'completed', ProcessedByUserID = ?, DateProcessed = NOW() "
+                    + "WHERE RequestID = ?";
+
             PreparedStatement pst = conn.prepareStatement(query);
             pst.setInt(1, currentUserId);
             pst.setInt(2, requestId);
             pst.executeUpdate();
-            
+
             // Refresh data and clear selection
             populateDocumentRequests();
             jTable1.clearSelection();
             JOptionPane.showMessageDialog(this, "Request approved successfully");
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error approving request: " + e.getMessage());
         }
     }//GEN-LAST:event_approveButtonActionPerformed
+
+    private void filterByStatus() {
+    String selectedStatus = (String) jComboBox1.getSelectedItem();
+    if (selectedStatus.equals("All")) {
+        sorter.setRowFilter(null); // Show all rows
+    } else {
+        // Create a case-insensitive filter
+        RowFilter<DefaultTableModel, Object> filter = RowFilter.regexFilter("(?i)" + selectedStatus.trim(), 5);
+        sorter.setRowFilter(filter);
+    }
+}
+    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+        // TODO add your handling code here:
+        filterByStatus();
+    }//GEN-LAST:event_jComboBox1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -286,6 +323,7 @@ public class Documentapproval extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton approveButton;
+    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
