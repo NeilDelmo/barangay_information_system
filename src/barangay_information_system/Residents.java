@@ -373,6 +373,8 @@ private void addFamilyHeadListeners() {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         submitResidentData();
+        jTextField7.setText("Balibago Calatagan Batangas");
+        
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
