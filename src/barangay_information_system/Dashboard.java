@@ -334,7 +334,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         genderComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        jLabel2.setText("Filter by Gender");
+        jLabel2.setText("Filter by Sex");
 
         filterButton.setText("Filter");
         filterButton.addActionListener(new java.awt.event.ActionListener() {
@@ -432,7 +432,7 @@ public class Dashboard extends javax.swing.JFrame {
 
      private void populateTable(String searchTerm, String genderFilter) {
         DefaultTableModel tableModel = new DefaultTableModel(
-            new String[]{"Full Name", "Gender", "Address"}, 0
+            new String[]{"Full Name", "Sex", "Address"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -546,6 +546,7 @@ public class Dashboard extends javax.swing.JFrame {
     }
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
+        this.dispose();
         Login login = new Login();
         login.setVisible(true);
     }//GEN-LAST:event_jButton3ActionPerformed
